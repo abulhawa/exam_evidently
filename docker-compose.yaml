@@ -1,0 +1,29 @@
+volumes:
+  bike_sharing_monitoring: {}
+
+services:
+  monitor-script:
+    build: .
+    image: bike-sharing-monitoring
+    volumes:
+      - bike_sharing_monitoring:/app/bike_sharing_monitoring
+      - ./reports:/app/reports
+
+  monitor-ui:
+    image: bike-sharing-monitoring
+    command:
+      - evidently
+      - ui
+      - --workspace
+      - /app/bike_sharing_monitoring
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - bike_sharing_monitoring:/app/bike_sharing_monitoring
+    depends_on:
+      monitor-script:
+        condition: service_completed_successfully
